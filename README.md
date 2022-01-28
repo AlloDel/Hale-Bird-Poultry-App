@@ -1,4 +1,4 @@
-# halebirdpoultryapp
+# Hale Bird Poultry mobile application
 
 A new Flutter project.
 
