@@ -24,7 +24,12 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
   ///
   /// **********************************
   /// const snackBar = SnackBar(
-  ///   content: Text('Pull Down To Refresh!'),
+  ///   content: Text('Pull Down To Refresh!'), || Text('Tap to Refresh page!'),
+  ///   action: SnackBarAction(
+  ///    label: 'Undo',
+  ///    onPressed: () {
+  ///      // Some code to undo the change.
+  ///    },),
   /// );
   /// ----------------------------------
   ///   onWebResourceError: ScaffoldMessenger.of(context).showSnackBar(snackBar);
