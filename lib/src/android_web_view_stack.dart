@@ -13,6 +13,28 @@ class AndroidWebViewStack extends StatefulWidget {
 }
 
 class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
+  /// TO-DO:
+  /// Add (pull down to refresh)
+  ///   RefreshIndicator  //add physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+  ///     and webviewcontroller.reload()
+  /// When page does not load i.e,
+  ///   onWebResourceError
+  ///     show snackbar or [outlined arrow]
+  ///         "Pull down to refresh"
+  ///
+  /// **********************************
+  /// const snackBar = SnackBar(
+  ///   content: Text('Pull Down To Refresh!'),
+  /// );
+  /// ----------------------------------
+  ///   onWebResourceError: ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  ///
+  ///***********************************
+  ///
+  ///
+  /// Do also for IOS webview
+  ///
+  ///
   var loadingPercentage = 0;
 
   WebViewController? _controller;
