@@ -34,7 +34,7 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
   @override
   Widget build(BuildContext context) {
     final snackBar = SnackBar(
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 30),
       content:
           const Text('Check your internet!'), // Text('Tap to Refresh page!'),
       action: SnackBarAction(
