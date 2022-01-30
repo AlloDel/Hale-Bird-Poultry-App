@@ -16,7 +16,7 @@ class _SplashState extends State<Splash> {
   void initState() {
     super.initState();
     Timer(
-      const Duration(seconds: 2),
+      const Duration(seconds: 1),
       () {
         if (Platform.isAndroid) {
           Navigator.pushReplacement(

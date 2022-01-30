@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart'; //support file picking in ios
 
 class IosWebViewStack extends StatefulWidget {
@@ -11,6 +12,11 @@ class IosWebViewStack extends StatefulWidget {
 }
 
 class _IosWebViewStackState extends State<IosWebViewStack> {
+  ///
+  /// TO-DO
+  /// Add refreshindicator
+  ///
+  ///
   var loadingPercentage = 0;
 
   WebViewController? _controller;
@@ -25,35 +31,56 @@ class _IosWebViewStackState extends State<IosWebViewStack> {
 
   @override
   Widget build(BuildContext context) {
+    final snackBar = SnackBar(
+      duration: const Duration(seconds: 15),
+      content:
+          const Text('Check your internet!'), // Text('Tap to Refresh page!'),
+      action: SnackBarAction(
+          label: 'Reload',
+          onPressed: () {
+            _controller!.reload();
+            // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          }),
+    );
+
     return SafeArea(
       child: WillPopScope(
         onWillPop: _goBack,
+
+        // child: RefreshIndicator(
+        //   ///pull to reload page
+        //   onRefresh: () => _controller!.reload(),
+
         child: Scaffold(
           body: Stack(
             children: [
+              Positioned(child: Container()),
               WebView(
-                initialUrl: "https://halebirdpoultry.com/",
-                onWebViewCreated: (webViewController) {
-                  _controller = webViewController;
-                },
-                onPageStarted: (url) {
-                  setState(() {
-                    loadingPercentage = 0;
-                  });
-                },
-                onProgress: (progress) {
-                  setState(() {
-                    loadingPercentage = progress;
-                  });
-                },
-                onPageFinished: (url) {
-                  setState(() {
-                    loadingPercentage = 100;
-                  });
-                },
-                javascriptMode: JavascriptMode.unrestricted,
-                gestureNavigationEnabled: true,
-              ),
+                  initialUrl: "https://halebirdpoultry.com/",
+                  onWebViewCreated: (webViewController) {
+                    _controller = webViewController;
+                  },
+                  onPageStarted: (url) {
+                    setState(() {
+                      loadingPercentage = 0;
+                    });
+                  },
+                  onProgress: (progress) {
+                    setState(() {
+                      loadingPercentage = progress;
+                    });
+                  },
+                  onPageFinished: (url) {
+                    setState(() {
+                      loadingPercentage = 100;
+                    });
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                  javascriptMode: JavascriptMode.unrestricted,
+                  gestureNavigationEnabled: true,
+                  onWebResourceError: (WebResourceError error) {
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  }),
               if (loadingPercentage < 100)
                 LinearProgressIndicator(
                   backgroundColor: Colors.white,
@@ -63,6 +90,8 @@ class _IosWebViewStackState extends State<IosWebViewStack> {
             ],
           ),
         ),
+        ////
+        // ),
       ),
     );
   }
@@ -104,7 +133,7 @@ class _IosWebViewStackState extends State<IosWebViewStack> {
         ),
       );
       if (goBack == true) {
-        Navigator.pop(context);
+        SystemNavigator.pop(); //
       }
       return goBack!;
     }
