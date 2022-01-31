@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart'; //support file picking in ios
 
 class IosWebViewStack extends StatefulWidget {
@@ -27,6 +28,10 @@ class _IosWebViewStackState extends State<IosWebViewStack> {
       WebView.platform = SurfaceAndroidWebView();
     }
     super.initState();
+  }
+
+  void _launchURL(url) async {
+    await canLaunch(url) ? launch(url) : debugPrint('Could not launch $url');
   }
 
   @override
@@ -76,8 +81,24 @@ class _IosWebViewStackState extends State<IosWebViewStack> {
                     });
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   },
+                  navigationDelegate: (NavigationRequest request) {
+                    if (request.url.contains('mailto:')) {
+                      _launchURL(request.url);
+                      return NavigationDecision.prevent;
+                    }
+                    if (request.url.contains('whatsapp')) {
+                      _launchURL(request.url);
+                      return NavigationDecision.prevent;
+                    }
+                    if (request.url.contains('wa.me')) {
+                      _launchURL(request.url);
+                      return NavigationDecision.prevent;
+                    }
+                    return NavigationDecision.navigate;
+                  },
                   javascriptMode: JavascriptMode.unrestricted,
                   gestureNavigationEnabled: true,
+                  // geolocationEnabled: true,
                   onWebResourceError: (WebResourceError error) {
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   }),
