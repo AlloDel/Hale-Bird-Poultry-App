@@ -3,55 +3,74 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter_webview_pro/platform_interface.dart';
-// import 'package:webview_flutter/webview_flutter.dart';  //doesnot support file picking in android
-import 'package:flutter_webview_pro/webview_flutter.dart'; //support file picking in android
 
-class AndroidWebViewStack extends StatefulWidget {
-  const AndroidWebViewStack({Key? key}) : super(key: key);
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+// import 'package:flutter_webview_pro/platform_interface.dart';
+// import 'package:webview_flutter/webview_flutter.dart';  //doesnot support file picking in android
+// import 'package:flutter_webview_pro/webview_flutter.dart'; //support file picking in android
+
+class GeneralWebview extends StatefulWidget {
+  const GeneralWebview({Key? key}) : super(key: key);
 
   @override
-  _AndroidWebViewStackState createState() => _AndroidWebViewStackState();
+  _GeneralWebviewState createState() => _GeneralWebviewState();
 }
 
-class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
-  ///
+class _GeneralWebviewState extends State<GeneralWebview> {
   /// TO-DO
   /// Add refreshindicator
   ///
-  ///
-  var loadingPercentage = 0;
 
-  WebViewController? _controller;
+  InAppWebViewController? webViewController;
+  String? urlink;
+  double loadingPercentage = 0;
   bool? isError = false;
+  PullToRefreshController? pullToRefreshController;
 
   @override
   void initState() {
-    if (Platform.isAndroid) {
-      WebView.platform = SurfaceAndroidWebView();
-    }
+    pullToRefreshController = PullToRefreshController(
+      options: PullToRefreshOptions(
+        color: Colors.green,
+      ),
+      onRefresh: () async {
+        if (Platform.isAndroid) {
+          webViewController?.reload();
+        } else if (Platform.isIOS) {
+          webViewController?.loadUrl(
+              urlRequest: URLRequest(url: await webViewController?.getUrl()));
+        }
+      },
+    );
     super.initState();
   }
 
-  void _launchURL(url) async {
-    await canLaunch(url) ? launch(url) : debugPrint('Could not launch $url');
+  void _launchURL(String? url) async {
+    if (await canLaunch(url!)) {
+      await launch(
+        url,
+        // universalLinksOnly: true,
+      );
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     ///
     ///
-    final snackBar = SnackBar(
-      duration: const Duration(seconds: 30),
-      content:
-          const Text('Check your internet!'), // Text('Tap to Refresh page!'),
-      action: SnackBarAction(
-          label: 'Reload',
-          onPressed: () {
-            _controller!.reload();
-            // ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          }),
-    );
+    // final snackBar = SnackBar(
+    //   duration: const Duration(seconds: 30),
+    //   content:
+    //       const Text('Check your internet!'), // Text('Tap to Refresh page!'),
+    //   action: SnackBarAction(
+    //       label: 'Reload',
+    //       onPressed: () {
+    //         _controller!.reload();
+    //         // ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    //       }),
+    // );
 
     ///
     ///
@@ -61,74 +80,116 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
         child: Scaffold(
           body: Stack(
             children: [
-              // Positioned(child: Container()),
               // if (isError == false)
-              WebView(
-                initialUrl: "https://halebirdpoultry.com/login",
-                onWebViewCreated: (webViewController) {
-                  _controller = webViewController;
-                },
-                onPageStarted: (url) {
-                  setState(() {
-                    loadingPercentage = 0;
-                  });
-                },
-                onProgress: (progress) {
-                  setState(() {
-                    loadingPercentage = progress;
-                  });
+              InAppWebView(
+                initialUrlRequest: URLRequest(
+                    url: Uri.parse("https://halebirdpoultry.com/login")),
 
-                  _controller!.evaluateJavascript(
-                      "document.getElementsByClassName('footer')[0].style.display='none';");
+                initialOptions: InAppWebViewGroupOptions(
+                    crossPlatform: InAppWebViewOptions(
+                      useShouldOverrideUrlLoading: true,
+                      mediaPlaybackRequiresUserGesture: false,
+                    ),
+                    android: AndroidInAppWebViewOptions(
+                      useHybridComposition: true,
+                    ),
+                    ios: IOSInAppWebViewOptions(
+                      allowsInlineMediaPlayback: true,
+                    )),
+
+                // initialUrl: "https://halebirdpoultry.com/login",
+                pullToRefreshController: pullToRefreshController,
+
+                onWebViewCreated: (controller) {
+                  webViewController = controller;
                 },
-                onPageFinished: (url) {
+
+                // onPageStarted: (url) {
+                onLoadStart: (controller, url) {
                   setState(() {
-                    loadingPercentage = 100;
+                    urlink = url.toString();
                     isError = false;
                   });
+                },
+                androidOnPermissionRequest:
+                    (controller, origin, resources) async {
+                  return PermissionRequestResponse(
+                      resources: resources,
+                      action: PermissionRequestResponseAction.GRANT);
+                },
 
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-                navigationDelegate: (NavigationRequest request) {
-                  if (request.url.contains('mailto:')) {
-                    _launchURL(request.url);
-                    return NavigationDecision.prevent;
+                shouldOverrideUrlLoading:
+                    (webViewController, navigationAction) async {
+                  var uri = navigationAction.request.url!.toString();
+                  debugPrint("URI at navigation = $uri");
+
+                  if (uri.contains('mailto:')) {
+                    _launchURL("mailto:%20halebirdpoultry@gmail.com");
+                    // and cancel the request
+                    return NavigationActionPolicy.CANCEL;
                   }
-                  if (request.url.contains('whatsapp')) {
-                    _launchURL(request.url);
-                    return NavigationDecision.prevent;
+                  if (uri.contains('instagram.com')) {
+                    _launchURL(
+                        "https://instagram.com/halebirdzpoultry?utm_medium=copy_link.scheme");
+                    // and cancel the request
+                    return NavigationActionPolicy.CANCEL;
                   }
-                  if (request.url.contains('wa.me')) {
-                    _launchURL(request.url);
-                    return NavigationDecision.prevent;
-                  }
-                  //-------------------------------------------------------//
-                  debugPrint("ISERROR in NAVIGATION DECISION : $isError");
                   if (isError == true) {
-                    setState(() {});
                     checkError();
-                    return NavigationDecision.prevent;
+                    return NavigationActionPolicy.CANCEL;
                   }
-                  //--------------------------------------------------------//
-                  return NavigationDecision.navigate;
+                  return NavigationActionPolicy.ALLOW;
                 },
-                onWebResourceError: (WebResourceError error) {
+
+                onLoadStop: (controller, url) => webViewController!
+                    .evaluateJavascript(
+                        source:
+                            "document.getElementsByClassName('footer')[0].style.display='none';"),
+
+                onLoadError: (controller, url, code, message) {
+                  // pullToRefreshController!.endRefreshing();
+                  // setState(() {
+                  //   isError = true;
+                  // });
+                  // webViewController!.stopLoading();
+                  checkError();
+                },
+                onLoadHttpError: (controller, url, statusCode, description) {
+                  // pullToRefreshController!.endRefreshing();
+                  // setState(() {
+                  //   isError = true;
+                  // });
+                  // webViewController!.pauseTimers();
+                  checkError();
+                },
+
+                // onWebResourceError: (WebResourceError error) {
+                //   setState(() {
+                //     isError = true;
+                //   });
+                //   debugPrint("ISERROR in WEBSOURCE ERROR : $isError");
+                //   // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                // },
+                // onProgress: (progress) {
+
+                onProgressChanged: (controller, progress) {
+                  if (progress == 100) {
+                    pullToRefreshController!.endRefreshing();
+                  }
                   setState(() {
-                    isError = true;
+                    loadingPercentage = progress / 100;
                   });
-                  debugPrint("ISERROR in WEBSOURCE ERROR : $isError");
-                  // _controller!.reload();
-                  // ScaffoldMessenger.of(context).showSnackBar(snackBar);
                 },
-                javascriptMode: JavascriptMode.unrestricted,
-                gestureNavigationEnabled: true,
-                geolocationEnabled: true,
+
+                // javascriptMode: JavascriptMode.unrestricted,
+                // gestureNavigationEnabled: true,
+                // geolocationEnabled: true,
               ),
-              if (loadingPercentage < 100)
+              if (loadingPercentage < 1)
                 LinearProgressIndicator(
                   backgroundColor: Colors.white,
                   color: Colors.green,
-                  value: loadingPercentage / 100,
+                  value: loadingPercentage,
                 ),
 
               // if (isError == true)
@@ -160,6 +221,7 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
 
   checkError() async {
     await showDialog(
+      barrierDismissible: false,
       context: context,
       builder: (context) => AlertDialog(
         title: const Center(
@@ -170,8 +232,6 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
           ),
         ),
         content: Container(
-          // height: MediaQuery.of(context).size.height * 0.2,
-          // width: MediaQuery.of(context).size.width * 0.6,
           padding: const EdgeInsets.all(8),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -204,12 +264,14 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
         actions: <Widget>[
           TextButton(
             onPressed: () {
-              _controller!.reload();
+              webViewController!.reload();
+              // pullToRefreshController!.endRefreshing();
               // setState(() {
               //   isError = false;
               // });
+              Navigator.of(context, rootNavigator: true).pop();
             },
-            child: const Text("Refresh page",
+            child: const Text("Refresh",
                 style: TextStyle(fontSize: 16, color: Colors.blueGrey)),
           ),
         ],
@@ -220,9 +282,9 @@ class _AndroidWebViewStackState extends State<AndroidWebViewStack> {
   Future<bool> _goBack() async {
     bool? goBack;
 
-    var value = await _controller!.canGoBack();
+    var value = await webViewController!.canGoBack();
     if (value) {
-      _controller!.goBack();
+      webViewController!.goBack();
       return Future.value(false);
     } else {
       await showDialog(
