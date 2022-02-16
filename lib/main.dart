@@ -8,6 +8,7 @@ import 'package:halebirdpoultryapp/pages/home.dart';
 import 'package:halebirdpoultryapp/src/android_web_view_stack.dart';
 import 'package:halebirdpoultryapp/src/general_view.dart';
 import 'package:halebirdpoultryapp/src/ios_web_view_stack.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // import 'package:halebirdpoultryapp/pages/homepage.dart';
 
@@ -18,6 +19,9 @@ Future<void> main() async {
   if (Platform.isAndroid) {
     await AndroidInAppWebViewController.setWebContentsDebuggingEnabled(true);
   }
+
+  await Permission.camera.request();
+  await Permission.storage.request();
 
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
       overlays: [SystemUiOverlay.bottom, SystemUiOverlay.top]);

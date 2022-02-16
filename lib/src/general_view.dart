@@ -124,13 +124,17 @@ class _GeneralWebviewState extends State<GeneralWebview> {
                   debugPrint("URI at navigation = $uri");
 
                   if (uri.contains('mailto:')) {
-                    _launchURL("mailto:%20halebirdpoultry@gmail.com");
+                    _launchURL(uri);
                     // and cancel the request
                     return NavigationActionPolicy.CANCEL;
                   }
                   if (uri.contains('instagram.com')) {
-                    _launchURL(
-                        "https://instagram.com/halebirdzpoultry?utm_medium=copy_link.scheme");
+                    _launchURL(uri);
+                    // and cancel the request
+                    return NavigationActionPolicy.CANCEL;
+                  }
+                  if (uri.contains('facebook.com')) {
+                    _launchURL(uri);
                     // and cancel the request
                     return NavigationActionPolicy.CANCEL;
                   }
@@ -265,10 +269,6 @@ class _GeneralWebviewState extends State<GeneralWebview> {
           TextButton(
             onPressed: () {
               webViewController!.reload();
-              // pullToRefreshController!.endRefreshing();
-              // setState(() {
-              //   isError = false;
-              // });
               Navigator.of(context, rootNavigator: true).pop();
             },
             child: const Text("Refresh",
