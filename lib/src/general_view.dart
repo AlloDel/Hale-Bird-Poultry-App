@@ -59,7 +59,6 @@ class _GeneralWebviewState extends State<GeneralWebview> {
   @override
   Widget build(BuildContext context) {
     ///
-    ///
     // final snackBar = SnackBar(
     //   duration: const Duration(seconds: 30),
     //   content:
@@ -71,9 +70,8 @@ class _GeneralWebviewState extends State<GeneralWebview> {
     //         // ScaffoldMessenger.of(context).hideCurrentSnackBar();
     //       }),
     // );
+    ///
 
-    ///
-    ///
     return SafeArea(
       child: WillPopScope(
         onWillPop: _goBack,
@@ -139,7 +137,7 @@ class _GeneralWebviewState extends State<GeneralWebview> {
                     return NavigationActionPolicy.CANCEL;
                   }
                   if (isError == true) {
-                    checkError();
+                    // checkError();
                     return NavigationActionPolicy.CANCEL;
                   }
                   return NavigationActionPolicy.ALLOW;
@@ -152,19 +150,21 @@ class _GeneralWebviewState extends State<GeneralWebview> {
 
                 onLoadError: (controller, url, code, message) {
                   // pullToRefreshController!.endRefreshing();
-                  // setState(() {
-                  //   isError = true;
-                  // });
-                  // webViewController!.stopLoading();
-                  checkError();
+                  setState(() {
+                    isError = true;
+                  });
+                  webViewController!.stopLoading();
+                  errorCheck();
+                  // checkError();
                 },
                 onLoadHttpError: (controller, url, statusCode, description) {
                   // pullToRefreshController!.endRefreshing();
-                  // setState(() {
-                  //   isError = true;
-                  // });
-                  // webViewController!.pauseTimers();
-                  checkError();
+                  setState(() {
+                    isError = true;
+                  });
+                  webViewController!.stopLoading();
+                  errorCheck();
+                  // checkError();
                 },
 
                 // onWebResourceError: (WebResourceError error) {
@@ -189,92 +189,48 @@ class _GeneralWebviewState extends State<GeneralWebview> {
                 // gestureNavigationEnabled: true,
                 // geolocationEnabled: true,
               ),
-              if (loadingPercentage < 1)
-                LinearProgressIndicator(
-                  backgroundColor: Colors.white,
-                  color: Colors.green,
-                  value: loadingPercentage,
-                ),
 
+              // PROGRESS INDICATOR REMOVED
+              // if (loadingPercentage < 1)
+              //   LinearProgressIndicator(
+              //     backgroundColor: Colors.white,
+              //     color: Colors.green,
+              //     value: loadingPercentage,
+              //   ),
               // if (isError == true)
               //   Center(
-              //     child: Padding(
+              //     child: Container(
+              //       color: Colors.transparent,
               //       padding: const EdgeInsets.all(32),
+              //       height: MediaQuery.of(context).size.height * 0.95,
+              //       width: MediaQuery.of(context).size.width * 0.95,
               //       child: TextButton(
               //         onPressed: () {
-              //           // _controller!.reload();
+              //           webViewController!.reload();
               //           setState(() {
               //             isError = false;
               //           });
               //         },
               //         child: const Text(
-              //           '''Something went wrong!\nCheck your internet and\nTap to reload''',
+              //           '''Something went wrong!\n\nCheck your internet!\n\nTap to reload''',
               //           textAlign: TextAlign.center,
+              //           style: TextStyle(fontSize: 16),
               //         ),
               //       ),
               //     ),
               //   )
             ],
           ),
+          /////------for debugging errordialog-------/////
+          // floatingActionButton: FloatingActionButton(
+          //   onPressed: () {
+          //     errorCheck();
+          //   },
+          //   child: const Icon(Icons.ac_unit),
+          // ),
         ),
         ////
         // ),
-      ),
-    );
-  }
-
-  checkError() async {
-    await showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Center(
-          child: Icon(
-            Icons.error,
-            color: Colors.green,
-            size: 48,
-          ),
-        ),
-        content: Container(
-          padding: const EdgeInsets.all(8),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: const [
-              Center(
-                child: Text(
-                  'Something went wrong!',
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16.0,
-                  ),
-                ),
-              ),
-              Center(
-                child: Text(
-                  'Check your internet!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.blueGrey,
-                    fontSize: 16.0,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actionsPadding: const EdgeInsets.all(12),
-        actionsAlignment: MainAxisAlignment.center,
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              webViewController!.reload();
-              Navigator.of(context, rootNavigator: true).pop();
-            },
-            child: const Text("Refresh",
-                style: TextStyle(fontSize: 16, color: Colors.blueGrey)),
-          ),
-        ],
       ),
     );
   }
@@ -367,5 +323,184 @@ class _GeneralWebviewState extends State<GeneralWebview> {
       }
       return goBack!;
     }
+  }
+
+  // checkError() async {
+  //   await showDialog(
+  //     barrierDismissible: false,
+  //     context: context,
+  //     builder: (context) => AlertDialog(
+  //       content: Container(
+  //         color: Colors.white,
+  //         width: MediaQuery.of(context).size.width * 0.9,
+  //         height: MediaQuery.of(context).size.height * 0.9,
+  //         padding: const EdgeInsets.all(8),
+  //         child: Column(
+  //           mainAxisSize: MainAxisSize.min,
+  //           mainAxisAlignment: MainAxisAlignment.start,
+  //           // crossAxisAlignment: CrossAxisAlignment.start,
+  //           children: [
+  //             const Center(
+  //               child: Icon(
+  //                 Icons.error,
+  //                 color: Colors.green,
+  //                 size: 54,
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: MediaQuery.of(context).size.width * 0.95,
+  //               height: MediaQuery.of(context).size.width * 0.2,
+  //               child: Container(),
+  //             ),
+  //             const Center(
+  //               child: Text(
+  //                 'Something went wrong!',
+  //                 style: TextStyle(
+  //                   color: Colors.blueGrey,
+  //                   fontSize: 16.0,
+  //                 ),
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: MediaQuery.of(context).size.width * 0.95,
+  //               height: MediaQuery.of(context).size.width * 0.1,
+  //               child: Container(),
+  //             ),
+  //             const Center(
+  //               child: Text(
+  //                 'Check your internet!',
+  //                 textAlign: TextAlign.center,
+  //                 style: TextStyle(
+  //                   color: Colors.blueGrey,
+  //                   fontSize: 16.0,
+  //                 ),
+  //               ),
+  //             ),
+  //             SizedBox(
+  //               width: MediaQuery.of(context).size.width * 0.95,
+  //               height: MediaQuery.of(context).size.width * 0.7,
+  //               child: Container(),
+  //             ),
+  //             Center(
+  //               child: TextButton(
+  //                 onPressed: () {
+  //                   webViewController!.reload();
+  //                   Navigator.of(context, rootNavigator: true).pop();
+  //                 },
+  //                 child: const Text(
+  //                   "Refresh",
+  //                   style: TextStyle(fontSize: 16, color: Colors.blueGrey),
+  //                 ),
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  errorCheck() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => Dialog(
+        insetAnimationDuration: const Duration(milliseconds: 1),
+        insetPadding: const EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        //this right here
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.98,
+          width: MediaQuery.of(context).size.width * 0.98,
+          child: Column(
+            children: [
+              Container(
+                decoration: const BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(12),
+                      topRight: Radius.circular(12)),
+                  color: Colors.green,
+                ),
+                height: MediaQuery.of(context).size.height * 0.3,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  // crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    // const Divider(),
+                    Center(
+                      child: Icon(
+                        Icons.error_outline,
+                        color: Colors.white,
+                        size: 96,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width * 0.25,
+                        child: Container(),
+                      ),
+                      const Center(
+                        child: Text(
+                          'Something went wrong!',
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width * 0.2,
+                        child: Container(),
+                      ),
+                      const Center(
+                        child: Text(
+                          'Check your internet!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.blueGrey,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.width * 0.3,
+                        child: Container(),
+                      ),
+                      Center(
+                        child: Container(
+                          width: MediaQuery.of(context).size.width * 0.4,
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            color: Colors.green,
+                          ),
+                          child: TextButton(
+                            onPressed: () {
+                              webViewController!.reload();
+                              Navigator.of(context, rootNavigator: true).pop();
+                            },
+                            child: const Text(
+                              "Refresh",
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ))
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
