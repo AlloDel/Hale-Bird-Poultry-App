@@ -2,6 +2,9 @@
 
 A new Flutter project.
 
+App link on Google Playstore
+https://play.google.com/store/apps/details?id=com.halebirdpoultry.halebirdpoultryapp
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
